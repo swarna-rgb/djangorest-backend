@@ -1,21 +1,69 @@
 from django.shortcuts import render
 from django.http import JsonResponse,HttpResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
 from rest_framework.parsers import JSONParser
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
 from .models import Toy
-from .serializers import ToySerializer
-# Create your views here.
-@api_view(['GET','POST'])
-def toy_list(request,format=None):
-    if request.method == 'GET':
-        toys = Toy.objects.all()
-        serializer = ToySerializer(toys,many=True)
-        return Response(serializer.data)
-    elif request.method == 'POST':
-        toydata = JSONParser().parse(request)
+from .serializers import ToySerializer,AuthUserSerializer
+from .helper import GetallObjectsMixin
+# Create your views here
+from rest_framework.mixins import (
+    CreateModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin,DestroyModelMixin
+)
+
+from rest_framework import generics
+
+class GenericToyList(generics.ListCreateAPIView):
+    queryset = Toy.objects.all()
+    serializer_class = ToySerializer
+
+class GenericToyDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Toy.objects.all()
+    serializer_class = ToySerializer
+
+
+class ToyListMixins(generics.GenericAPIView,  # generic view functionality
+                     CreateModelMixin,  # handles POSTs
+                     #RetrieveModelMixin,  # handles GETs for 1 Toy
+                     #  UpdateModelMixin,  # handles PUTs and PATCHes
+                     ListModelMixin):  # handles GETs for many Toys
+      serializer_class = ToySerializer
+      queryset = Toy.objects.all()
+
+      def get(self, request, *args, **kwargs):
+          return self.list(request, *args, **kwargs)
+
+      def post(self, request, *args, **kwargs):
+          return self.create(request, *args, **kwargs)
+
+class ToyDetailMixins(generics.GenericAPIView,RetrieveModelMixin,UpdateModelMixin,DestroyModelMixin):
+    serializer_class = ToySerializer
+    queryset = Toy.objects.all()
+    lookup_field = 'id'
+    def get(self, request, *args, **kwargs):
+        return self.retrieve(request, *args, **kwargs)
+
+    def put(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def patch(self, request, *args, **kwargs):
+        return self.update(request, *args, **kwargs)
+
+    def delete(self, request, *args, **kwargs):
+        return self.destroy(request, *args, **kwargs)
+
+class UserList(GetallObjectsMixin,APIView):
+        model = User
+        serializer = AuthUserSerializer
+
+class ToyList(GetallObjectsMixin,APIView):
+    model = Toy
+    serializer = ToySerializer
+    def post(self,request):
+        toydata = JSONParser().parse(request.data)
         serializer = ToySerializer(data=toydata)
         if serializer.is_valid():
             serializer.save()
@@ -25,19 +73,22 @@ def toy_list(request,format=None):
 #GET - get a toy instance
 #PUT - update a toy instance
 #DELETE - delete a toy instance
-@api_view(['GET','PUT','DELETE'])
-def toy_detail(request,id,format=None):
 
-    try:
-        toyobject = Toy.objects.get(id=id)
-    except Toy.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+class ToyDetail(APIView):
+    def get_object(self,id):
+        try:
+            toyobject = Toy.objects.get(id=id)
+            return toyobject
+        except Toy.DoesNotExist:
+            return Response(status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == 'GET':
+    def get(self,request,id,format=None):
+        toyobject = self.get_object(id)
         serializer = ToySerializer(toyobject)
         return Response(serializer.data)
 
-    if request.method == 'PUT':
+    def put(self,request,id,format=None):
+        toyobject = Toy.objects.get(id=id)
         toydata = JSONParser().parse(request)
         serializer = ToySerializer(data=toydata,instance=toyobject)
         if serializer.is_valid():
@@ -45,7 +96,8 @@ def toy_detail(request,id,format=None):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    if request.method == 'DELETE':
+    def delete(self,request,id,format=None):
+        toyobject = Toy.objects.get(id=id)
         toyobject.delete()
         return Response('deleted',status=status.HTTP_204_NO_CONTENT)
 

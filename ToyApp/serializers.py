@@ -2,9 +2,10 @@ from rest_framework import serializers
 from .models import Toy
 from django.contrib.auth.models import User
 class ToySerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
     class Meta:
         model = Toy
-        fields = ['id','name','category','created']
+        fields = ['id','name','category','created','owner']
 
 class AuthUserSerializer(serializers.ModelSerializer):
     class Meta:

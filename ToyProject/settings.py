@@ -53,6 +53,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000'
 ]
@@ -106,6 +107,13 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+REST_FRAMEWORK = {
+    # 'DEFAULT_PERMISSION_CLASSES':
+    #     ['rest_framework.permissions.IsAuthenticatedOrReadOnly', ],
+}
+#YourAppName: This is the name of the app that will have the User Model
+#YourClassName: This is the name of the class used inside the models.py file
+#AUTH_USER_MODEL = 'ToyApp.ToyStoreAPIUser'
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/

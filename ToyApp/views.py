@@ -14,13 +14,20 @@ from rest_framework.mixins import (
     CreateModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin,DestroyModelMixin
 )
 
-from rest_framework import generics
+from rest_framework import generics,permissions
+from .permissions import IsOwnerorReadOnly
+#
 
 class GenericToyList(generics.ListCreateAPIView):
+    permission_classes = [IsOwnerorReadOnly]
     queryset = Toy.objects.all()
     serializer_class = ToySerializer
+    def perform_create(self, serializer):
+        print('perform',self.request.user.is_superuser)
+        serializer.save(owner=self.request.user)
 
 class GenericToyDetail(generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly,IsOwnerorReadOnly]
     queryset = Toy.objects.all()
     serializer_class = ToySerializer
 

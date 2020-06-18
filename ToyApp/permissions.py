@@ -5,16 +5,15 @@ class IsOwnerorReadOnly(permissions.BasePermission):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
-        else:
-            if request.user.is_authenticated  and request.user.is_superuser:
-                return True
+
+        return request.user.is_authenticated and request.user.is_superuser
+
 
     def has_object_permission(self, request, view, obj):
-        print("username", request.user.username, request.user.is_superuser)
+
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        print("has_object_permission", obj.owner == request.user)
         return obj.owner == request.user
 
 

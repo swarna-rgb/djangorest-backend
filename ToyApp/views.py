@@ -9,6 +9,10 @@ from rest_framework.views import APIView
 from .models import Toy
 from .serializers import ToySerializer,AuthUserSerializer
 from .helper import GetallObjectsMixin
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 # Create your views here
 from rest_framework.mixins import (
     CreateModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin,DestroyModelMixin
@@ -16,12 +20,21 @@ from rest_framework.mixins import (
 
 from rest_framework import generics,permissions
 from .permissions import IsOwnerorReadOnly
+from rest_framework_simplejwt.authentication import JWTAuthentication,JWTTokenUserAuthentication
 #
+class Test_view(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self,request):
+        return HttpResponse('Hello world')
 
 class GenericToyList(generics.ListCreateAPIView):
-    permission_classes = [IsOwnerorReadOnly]
+   # authentication_classes = [JWTAuthentication]
+   # permission_classes = [IsOwnerorReadOnly]
+    permission_classes = [permissions.IsAuthenticated]
     queryset = Toy.objects.all()
     serializer_class = ToySerializer
+
     def perform_create(self, serializer):
         print('perform',self.request.user.is_superuser)
         serializer.save(owner=self.request.user)

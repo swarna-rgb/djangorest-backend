@@ -1,6 +1,14 @@
 from rest_framework import serializers
-from .models import Toy
+from .models import Toy,Product
 from django.contrib.auth.models import User
+
+class ProductSerializer(serializers.ModelSerializer):
+    slug = serializers.ReadOnlyField()
+    get_absolute_url = serializers.ReadOnlyField()
+    class Meta:
+        model = Product
+        fields = ['id','name','category','created','slug','get_absolute_url']
+
 class ToySerializer(serializers.ModelSerializer):
     owner = serializers.ReadOnlyField(source='owner.username')
     class Meta:

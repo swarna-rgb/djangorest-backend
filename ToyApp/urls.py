@@ -16,7 +16,9 @@ urlpatterns = [
     path('toys/<int:pk>/', views.GenericToyDetail.as_view(), name='generic_toy_detail'),
     path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('', views.Test_view.as_view(), name='test')
+    path('', views.Test_view.as_view(), name='test'),
+    path('products/',views.ProductList.as_view(), name='product_list' ),
+    path('products/<str:slug>/',views.ProductDetail.as_view(), name='product_detail' )
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

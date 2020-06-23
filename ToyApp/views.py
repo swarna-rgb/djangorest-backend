@@ -6,8 +6,8 @@ from rest_framework.parsers import JSONParser
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .models import Toy
-from .serializers import ToySerializer,AuthUserSerializer
+from .models import Toy,Product
+from .serializers import ToySerializer,AuthUserSerializer,ProductSerializer
 from .helper import GetallObjectsMixin
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
@@ -28,10 +28,19 @@ class Test_view(APIView):
     def get(self,request):
         return HttpResponse('Hello world')
 
+class ProductList(generics.ListCreateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+
+class ProductDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    lookup_field = 'slug'
+
 class GenericToyList(generics.ListCreateAPIView):
    # authentication_classes = [JWTAuthentication]
    # permission_classes = [IsOwnerorReadOnly]
-    permission_classes = [permissions.IsAuthenticated]
+   # permission_classes = [permissions.IsAuthenticated]
     queryset = Toy.objects.all()
     serializer_class = ToySerializer
 

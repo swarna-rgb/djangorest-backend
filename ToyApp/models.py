@@ -48,7 +48,7 @@ def generate_slug(sender, instance, *args, **kwargs):
     if not instance.slug:
         instance.slug = unique_slug_geneator(instance)
         print("slug created")
-pre_save.connect(generate_slug, sender=Product)
+#pre_save.connect(generate_slug, sender=Product)
 
 def unique_slug_geneator(instance):
     print(repr(instance))
